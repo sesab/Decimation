@@ -1,0 +1,11 @@
+set term post color eps  "Verdana" 10 enhanced 
+set out "Analitic_eigenvalue_smaller.eps"
+set multiplot         # engage multiplot mode
+set xlabel 'w'
+set tics nomirror
+set size .46,.5
+set xtics .002
+set ytics .05
+
+set multiplot
+

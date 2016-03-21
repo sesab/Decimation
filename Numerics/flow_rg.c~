@@ -1,0 +1,27 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+void main(void){
+
+  int i,j,t;
+  int N=100;
+  double J2,J4, DJ2, DJ4;
+  double delta, deltat=0.1;
+
+  delta=(double) 1./N;
+
+  for(i=0;i<N;i++) {
+    J2=i*delta;
+    for(j=0;j<N;j++) {
+      J4=j*delta;
+      for(t=0;t<M;t++){
+	DJ= -(1-J2)*deltat*J2;
+	DJ4= -deltat*J4*(3(1-J2)-J2(1-J2^3/J4));
+	J4[t]=J4+DJ4;
+	J2[t]=J2+DJ2;
+	
+    }
+  }
+
+}
