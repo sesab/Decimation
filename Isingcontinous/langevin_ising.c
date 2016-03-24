@@ -1,9 +1,11 @@
 /*Langevin dynamics of interacting continous variables s*/
-/*Interaction is J (default Lattice) */
+/*Interaction is determined by the list of nn (default Lattice of size L) */
 
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
+
 #define FNORM   (2.3283064365e-10)
 #define RANDOM  ((ira[ip++] = ira[ip1++] + ira[ip2++]) ^ ira[ip3++])
 #define FRANDOM (FNORM * RANDOM)
@@ -63,20 +65,24 @@ double gaussian ( double sigma)
 
 
 int main(int argc, char* argv[]){
-  int c, dim=1, N=1000, def=1;
-  double *s, **J;
+  int c, dim=1, N=1000, def=0, nn=1, **list, L, *vec, nnei;
+  int i,j,k;
+  double *s;
 
    
-   while((c=getopt(argc, argv, "s:D:n:d:")) != -1) {
+   while((c=getopt(argc, argv, "s:D:l:c:n:d:")) != -1) {
     switch(c){
     case 's':
       myrand=atoi(optarg);
       break;
-    case 'n':
-      N=atoi(optarg);
+    case 'l':
+      L=atoi(optarg);
       break;
     case 'D':
       dim=atoi(optarg);
+      break;
+    case 'n':
+      N=atoi(optarg);
       break;
     case 'c':
       def=atoi(optarg);
@@ -84,16 +90,72 @@ int main(int argc, char* argv[]){
     }
    }
    
+   //if default use square lattice using the dimension dim and lattice size L//
+   if(def==0)
+     N=pow(L,dim);
+
    //INITIALIZE//
    Init_Random();
    s=calloc(N,sizeof(double));
-   J=calloc(N,sizeof(double*));
+   list=calloc(N,sizeof(int*));
+   if(def==0)
+     nn=2*dim;
+   else
+     nn=N;
+
    for(i=0;i<N;i++)
-     J[i]=calloc(N,sizeof(double));
-
-   //DEFINE THE INTERACTION
+     list[i]=calloc(nn,sizeof(int));
 
 
- 
 
+   //DEFINE THE LIST OF NN IN A d-dim LATTICE
+   if(def==0) {
+     vec=calloc(dim,sizeof(int));
+
+     for(i=0;i<N;i++) {
+       for(j=0;j<dim;j++)
+	 vec[j]= (int) (i/pow(L,j)) % L ;
+       //   fprintf(stdout,"%d %d %d %d\n",i,vec[0],vec[1],vec[2]);
+       for(j=0;j<nn/2;j++){
+	 nnei=0;
+	 for(k=0;k<dim;k++)
+	   if(k==j)
+	     if(vec[k]==L-1)
+	       nnei += pow(L,k) * 0;
+	     else
+	       nnei += pow(L,k)*(vec[k]+1);
+	   else
+	     nnei += pow(L,k)*vec[k];
+	 list[i][j] = nnei;
+       }
+       for(j=nn/2;j<nn;j++){
+	 nnei=0;
+	 //CHECK BOUNDARY
+	 for(k=0;k<dim;k++)
+	   if(dim+k==j)
+	     if(vec[k]==0)
+	       nnei += pow(L,k) * (L-1);
+	     else
+	       nnei += pow(L,k)*(vec[k]-1);
+	   else
+	     nnei += pow(L,k)*vec[k];
+	 list[i][j] = nnei;
+       }
+     }
+   }
+
+   //CHECK NN
+ /* for(i=0;i<N;i++) { */
+ /*     fprintf(stdout,"%d ",i); */
+ /*     for(j=0;j<nn;j++) */
+ /*       fprintf(stdout,"%d ",list[i][j]); */
+ /*     fprintf(stdout,"\n"); */
+ /*   } */
+   
+
+   //RUN LANGEVIN USING LIST OF NN
+  
+   for(i=0;i<N;i++) {
+   }
+   
 }
