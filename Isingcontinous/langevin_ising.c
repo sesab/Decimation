@@ -9,8 +9,9 @@
 #define FNORM   (2.3283064365e-10)
 #define RANDOM  ((ira[ip++] = ira[ip1++] + ira[ip2++]) ^ ira[ip3++])
 #define FRANDOM (FNORM * RANDOM)
-#define MaxT 1000000
-#define Delta .0001
+#define MaxT 100000
+#define Delta .001
+#define NUMSAMPLES 100
 
 
 int myrand;
@@ -65,12 +66,12 @@ double gaussian ( double sigma)
 
 
 int main(int argc, char* argv[]){
-  int c, dim=1, N=1000, def=0, nn=1, **list, L, *vec, nnei;
-  int i,j,k;
-  double *s;
+  int c, dim=1, N=1000, def=0, nn=1, **list, L, *vec, nnei, *nni;
+  int i, j, k, t, num;
+  double *s, T=1, tmp, lambda=.01, *D, sum, *r, sqsigma, noise;
 
    
-   while((c=getopt(argc, argv, "s:D:l:c:n:d:")) != -1) {
+   while((c=getopt(argc, argv, "s:D:l:T:c:n:d:")) != -1) {
     switch(c){
     case 's':
       myrand=atoi(optarg);
@@ -87,6 +88,9 @@ int main(int argc, char* argv[]){
     case 'c':
       def=atoi(optarg);
       break;
+    case 'T':
+      T=atof(optarg);
+      break;
     }
    }
    
@@ -97,6 +101,7 @@ int main(int argc, char* argv[]){
    //INITIALIZE//
    Init_Random();
    s=calloc(N,sizeof(double));
+   r=calloc(N,sizeof(double));
    list=calloc(N,sizeof(int*));
    if(def==0)
      nn=2*dim;
@@ -111,10 +116,12 @@ int main(int argc, char* argv[]){
    //DEFINE THE LIST OF NN IN A d-dim LATTICE
    if(def==0) {
      vec=calloc(dim,sizeof(int));
-
+     nni=calloc(N,sizeof(int));
+     
      for(i=0;i<N;i++) {
        for(j=0;j<dim;j++)
 	 vec[j]= (int) (i/pow(L,j)) % L ;
+       
        //   fprintf(stdout,"%d %d %d %d\n",i,vec[0],vec[1],vec[2]);
        for(j=0;j<nn/2;j++){
 	 nnei=0;
@@ -151,11 +158,51 @@ int main(int argc, char* argv[]){
  /*       fprintf(stdout,"%d ",list[i][j]); */
  /*     fprintf(stdout,"\n"); */
  /*   } */
+
+   //INITIALIZE SPINS
+   sum=0;
+   for(i=0;i<N;i++) {
+     s[i]=gaussian(1);
+     sum += s[i]*s[i];   
+   }
+   //fprintf(stderr,"%lf %d\n",sum,N);
+   //for(i=0;i<N;i++)
+   //s[i] *= (double) N/sum;
    
 
-   //RUN LANGEVIN USING LIST OF NN
+
+   //RUN LANGEVIN USING LIST OF NNI
+   lambda=.0;
   
-   for(i=0;i<N;i++) {
+   D=calloc(N,sizeof(double));
+   for(t=0;t<MaxT;t++) {  
+     for(i=0;i<N;i++) {
+       sum=0;
+       sqsigma=0;
+       for(num=0;num<NUMSAMPLES;num++) {
+	 tmp=0;
+	 for(k=0;k<nni[i];k++)
+	   tmp += s[list[i][k]]-s[i];  
+	 noise=gaussian(1.);     
+	 D[i] = tmp*Delta + sqrt(2*T)*noise*sqrt(Delta)-r[i]*s[i]*Delta;
+	 sum += (s[i]+D[i])*(noise+tmp);
+	 //D[i] = sqrt(2*T)*noise*sqrt(Delta)-r[i]*s[i]*Delta;
+	 //sum += (s[i]+D[i])*noise;
+	 sqsigma += (s[i]+D[i])*(s[i]+D[i]);
+       }
+       //DETERMINE r(t+1)
+       r[i]=sum/sqsigma;
+       //fprintf(stderr,"%lf %lf\n",D[i],r[i]);
+     }
+     
+     for(i=0;i<N;i++){
+       s[i]=s[i]+D[i];
+  
+       if((t%100==0)&& ((i==10)|| (i==2)))
+	 fprintf(stdout,"%lf %lf %lf\n",t*Delta,s[i],r[i]);
+     }
    }
-   
 }
+
+
+
