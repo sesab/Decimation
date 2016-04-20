@@ -10,9 +10,10 @@
 #define RANDOM  ((ira[ip++] = ira[ip1++] + ira[ip2++]) ^ ira[ip3++])
 #define FRANDOM (FNORM * RANDOM)
 #define MaxT 100000
-#define Delta .0001
+#define Delta .01
 #define NUMSAMPLES 100
-#define NTEMP 1
+#define NTEMP 10
+#define PLOT 1
 
 int par=0;
 int myrand;
@@ -96,7 +97,7 @@ double gaussian ( double sigma)
 int main(int argc, char* argv[]){
   int c, dim=2, N=1000, def=0, nn=1, **list, L=10, *vec, nnei, *nni;
   int i, j, k, t, num, temp;
-  double **s, T=1, tmp, lambda=.01, **D, sum, r, sqsigma, sqsigma2=0, noise, *m, w=1, **corr, num1=0, num2=0, val;
+  double **s, T=1, tmp, lambda=.01, **D, sum, r, sqsigma, sqsigma2=0, noise, *m, w=1, **corr, *nm, **nmc, num1=0, num2=0, val, total_c, aver;
 
    
    while((c=getopt(argc, argv, "s:D:l:T:c:n:d:")) != -1) {
@@ -132,10 +133,13 @@ int main(int argc, char* argv[]){
 
    s=calloc(N,sizeof(double *));
    corr=calloc(N,sizeof(double *));
+   nmc=calloc(N,sizeof(double *));
    m=calloc(N,sizeof(double));
+   nm=calloc(N,sizeof(double));
    for(i=0;i<N;i++){
      s[i]=calloc(NUMSAMPLES,sizeof(double));
      corr[i]=calloc(N,sizeof(double));
+     nmc[i]=calloc(N,sizeof(double));
    }
    
    list=calloc(N,sizeof(int*));
@@ -170,6 +174,7 @@ int main(int argc, char* argv[]){
 	   else
 	     nnei += pow(L,k)*vec[k];
 	 list[i][j] = nnei;
+	 nni[i]++;
        }
        for(j=nn/2;j<nn;j++){
 	 nnei=0;
@@ -183,6 +188,7 @@ int main(int argc, char* argv[]){
 	   else
 	     nnei += pow(L,k)*vec[k];
 	 list[i][j] = nnei;
+	 nni[i]++;
        }
      }
    }
@@ -197,13 +203,7 @@ int main(int argc, char* argv[]){
 
    //INITIALIZE SPINS
   
-   for(j=0;j<NUMSAMPLES;j++){
-     w=1;  
-     for(i=0;i<N;i++) {
-       s[i][j]=1;       
-       //fprintf(stderr,"%lf\n",gaussian(1));
-     } 
-   }
+  
    //fprintf(stderr,"%lf %d\n",sum,N);
    //for(i=0;i<N;i++)
    //s[i] *= (double) N/sum;
@@ -215,18 +215,37 @@ int main(int argc, char* argv[]){
    D=calloc(N,sizeof(double*));
    for(i=0;i<N;i++)
      D[i]=calloc(NUMSAMPLES,sizeof(double));
-   lambda=.1;
+   lambda=.5;
+
+   for(temp=0;temp<NTEMP;temp++) {
+
+     //REINITIALIZE ALL THE AVERAGE VALUES
+
+     for(i=0;i<N;i++){
+       m[i]=0;
+       nm[i]=0;
+       for(j=0;j<N;j++){
+	 corr[i][j]=0;
+	 nmc[i][j]=0;
+       }
+     }
 
 
-   for(temp=NTEMP;temp>0;temp--) {
-     //T= T+2*temp/NTEMP;
+     if(NTEMP>1)
+       T= 1.3+(double)temp/NTEMP*.5;
+     
+     for(j=0;j<NUMSAMPLES;j++){
+       for(i=0;i<N;i++) {
+	 s[i][j]=1;       
+	 //fprintf(stderr,"%lf\n",gaussian(1));
+       } 
+     }
      for(t=0;t<MaxT;t++) { 
        sqsigma2=0; 
        sqsigma=0;
        for(i=0;i<N;i++) {
 	 sum=0;
 	 
-	
 	 //RUN SEVERAL PARALLEL DYNAMICS
 	 for(num=0;num<NUMSAMPLES;num++) {
 	   tmp=0;
@@ -236,63 +255,34 @@ int main(int argc, char* argv[]){
 	 
 	   val =   s[i][num]*s[i][num]*s[i][num];
 	   D[i][num] = tmp*Delta + noise*sqrt(Delta)-3*lambda*val*Delta;
-	   if(isinf(D[i][num])==1)
-	     fprintf(stderr,"error %lf %d %d %lf\n",s[i][num],i,num,tmp);
-	   if(isnan(s[i][num])==1) {
-	     fprintf(stderr,"now %lf %d %d %d %lf %lf %lf\n",tmp,i,t,num,noise,D[i][num],s[i][num]);
-	     //exit(EXIT_FAILURE);
-	   }
+	 
 	   //sum += (s[i][num]+ D[i][num])*(s[i][num]+ D[i][num]);
 	   //D[i] = sqrt(2*T)*noise*sqrt(Delta)-r[i]*s[i]*Delta;
 	   //sum += (s[i]+D[i])*noise;
 	   //sqsigma += (s[i][num]*s[i][num] -1) + Delta*noise*noise + 2*Delta*s[i][num]*tmp+2*sqrt(Delta)*noise*s[i][num];
 	   sqsigma2 += s[i][num]*tmp;
 	   sqsigma += val*s[i][num];
-	   if(isinf(sqsigma)==1) {
-	     fprintf(stderr,"%lf %lf %d %d %lf %lf\n",sqsigma,sqsigma2,i,t,val,s[i][num]);
-	     exit(EXIT_FAILURE);
-	   }
-
-	 
 	 }
        }
        
        r=T+(double)(sqsigma2-3*lambda*sqsigma)/N/NUMSAMPLES;
-       if(isinf(r)==1) {
-	 fprintf(stderr,"qui %lf %lf %lf %lf\n",r,sqsigma2,sqsigma,tmp);
-	 exit(EXIT_FAILURE);
-       }
+     
        for(i=0;i<N;i++) {
 	 for(num=0;num<NUMSAMPLES;num++){
 	   s[i][num]=s[i][num]*(1-r*Delta)+D[i][num];
-	   if(isnan(s[i][num])==1) {
-	     fprintf(stderr,"qui %lf %lf %lf %lf\n",r,sqsigma2,sqsigma,D[i][num]);
-	     exit(EXIT_FAILURE);
-	   }
+	
 	 }
-	 //DETERMINE r USING ALL THE RUNS
-	 //r[i]= sqsigma/sum/2.;
-	 //r[i]=Delta*(sqsigma2/NUMSAMPLES+T);
-	 //fprintf(stderr,"%d %lf %lf %lf\n",i,r[i],sum/NUMSAMPLES,sum);
-	 
-	 
-       
-	 //  fprintf(stderr,"qui\n");
-       //fflush(stderr);
-       //     getchar();
-       //UPDATE THE SPIN AND PRINT
-	 if((t%100==0)&&(i==20))
+	 //UPDATE THE SPIN AND PRINT
+	 if((t%100==0)&&(i==20)&& (PLOT)){
 	   fprintf(stdout,"%lf ",t*Delta);
-       
-       if((t%100==0)&&(i==20)){
-	 
+      
 	   sum=0;
-	   m[i]=0;
+	   aver=0;
 	   for(j=0;j<NUMSAMPLES;j++){
-	     m[i]+=s[i][j];
+	     aver +=s[i][j];
 	     sum += s[i][j]*s[i][j];
 	   }
-	   fprintf(stdout,"%lf %lf\n", m[i]/NUMSAMPLES,sum/NUMSAMPLES);
+	   fprintf(stdout,"%lf %lf\n", aver/NUMSAMPLES,sum/NUMSAMPLES);
 	   fflush(stdout);
 	   //COMPUTE CORRELATION
 	 }
@@ -304,24 +294,36 @@ int main(int argc, char* argv[]){
 	 }*/
        
        
-       if((t%100==0)&&(t>100)) {
-	 for(i=0;i<N;i++) {
+       if((t%100==0)&&(t>50000)) {
+	 
+	 for(i=0;i<N;i++) {	   
 	   for(k=0;k<NUMSAMPLES;k++) {
 	     m[i] += s[i][k];
+	     nm[i]++;
+	     mean += s[i][k];
 	   
 	   }
 	   for(j=i;j<N;j++) 
 	     for(k=0;k<NUMSAMPLES;k++) {
 	       corr[i][j] += s[i][k]*s[j][k]; 
-	      
+	       nmc[i][j]++;
 	     }
 	 }
        }
      }
-     /* for(i=0;i<N;i++) */
-     /*   for(j=0;j<N;j++)  */
-     //fprintf(stderr,"%lf %lf %lf\n",T,(double)corr[i][j]/num1-(m[/num2)*(aver/num2),(aver/num2));
-     /* fflush(stderr);*/
+     
+     total_c=0;
+     aver=0;
+     for(i=0;i<N;i++) {
+       aver += m[i]/nm[i];
+       
+       for(j=i;j<N;j++)
+	 if((nm[i]>0) && (nmc[i][j]>0))
+	   total_c += corr[i][j]/nmc[i][j]-m[i]/nm[i]*m[j]/nm[j];
+     }
+     fprintf(stderr,"%lf %lf %lf\n",T,(double)total_c,(double) aver/N);
+     fflush(stderr);   
+     fprintf(stdout,"\n\n"); 
    }
 }
 
