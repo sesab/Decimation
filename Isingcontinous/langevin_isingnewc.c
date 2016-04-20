@@ -12,7 +12,7 @@
 #define MaxT 100000
 #define Delta .01
 #define NUMSAMPLES 100
-#define NTEMP 10
+#define NTEMP 15
 #define PLOT 1
 
 int par=0;
@@ -232,7 +232,7 @@ int main(int argc, char* argv[]){
 
 
      if(NTEMP>1)
-       T= 1.3+(double)temp/NTEMP*.5;
+       T= 1.25+(double)temp * .06;
      
      for(j=0;j<NUMSAMPLES;j++){
        for(i=0;i<N;i++) {
@@ -294,13 +294,13 @@ int main(int argc, char* argv[]){
 	 }*/
        
        
-       if((t%100==0)&&(t>50000)) {
+       if((t%200==0)&&(t>50000)) {
 	 
 	 for(i=0;i<N;i++) {	   
 	   for(k=0;k<NUMSAMPLES;k++) {
 	     m[i] += s[i][k];
 	     nm[i]++;
-	     mean += s[i][k];
+	    
 	   
 	   }
 	   for(j=i;j<N;j++) 
