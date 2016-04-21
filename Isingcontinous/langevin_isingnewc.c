@@ -232,7 +232,7 @@ int main(int argc, char* argv[]){
 
 
      if(NTEMP>1)
-       T= 1.5+(double)temp * .1;
+       T= 1.5+(double)temp * .3;
      
      for(j=0;j<NUMSAMPLES;j++){
        for(i=0;i<N;i++) {
