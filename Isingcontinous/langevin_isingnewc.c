@@ -9,7 +9,7 @@
 #define FNORM   (2.3283064365e-10)
 #define RANDOM  ((ira[ip++] = ira[ip1++] + ira[ip2++]) ^ ira[ip3++])
 #define FRANDOM (FNORM * RANDOM)
-#define MaxT 100000
+#define MaxT 30000
 #define Delta .01
 #define NUMSAMPLES 100
 #define NTEMP 15
@@ -95,7 +95,7 @@ double gaussian ( double sigma)
 
 
 int main(int argc, char* argv[]){
-  int c, dim=2, N=1000, def=0, nn=1, **list, L=10, *vec, nnei, *nni;
+  int c, dim=3, N=1000, def=0, nn=1, **list, L=10, *vec, nnei, *nni;
   int i, j, k, t, num, temp;
   double **s, T=1, tmp, lambda=.01, **D, sum, r, sqsigma, sqsigma2=0, noise, *m, w=1, **corr, *nm, **nmc, num1=0, num2=0, val, total_c, aver;
 
@@ -232,7 +232,7 @@ int main(int argc, char* argv[]){
 
 
      if(NTEMP>1)
-       T= 1.25+(double)temp * .06;
+       T= 1.5+(double)temp * .1;
      
      for(j=0;j<NUMSAMPLES;j++){
        for(i=0;i<N;i++) {
@@ -294,7 +294,7 @@ int main(int argc, char* argv[]){
 	 }*/
        
        
-       if((t%200==0)&&(t>50000)) {
+       if((t%100==0)&&(t>5000)) {
 	 
 	 for(i=0;i<N;i++) {	   
 	   for(k=0;k<NUMSAMPLES;k++) {
@@ -324,8 +324,7 @@ int main(int argc, char* argv[]){
      fprintf(stderr,"%lf %lf %lf\n",T,(double)total_c,(double) aver/N);
      fflush(stderr);   
      fprintf(stdout,"\n\n"); 
-   }
-}
+   }}
 
 
 
