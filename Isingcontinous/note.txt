@@ -1,0 +1,7 @@
+d=2 Nsample=50
+t 1000000
+tmin > 500000
+
+d=3 Nsample=10
+t 100000
+tmin > 50000

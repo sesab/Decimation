@@ -9,10 +9,10 @@
 #define FNORM   (2.3283064365e-10)
 #define RANDOM  ((ira[ip++] = ira[ip1++] + ira[ip2++]) ^ ira[ip3++])
 #define FRANDOM (FNORM * RANDOM)
-#define MaxT 30000
+#define MaxT 1000000
 #define Delta .01
-#define NUMSAMPLES 100
-#define NTEMP 15
+#define NUMSAMPLES 10
+#define NTEMP 1
 #define PLOT 1
 
 int par=0;
@@ -95,12 +95,12 @@ double gaussian ( double sigma)
 
 
 int main(int argc, char* argv[]){
-  int c, dim=3, N=1000, def=0, nn=1, **list, L=10, *vec, nnei, *nni;
+  int c, dim=2, N=1000, def=0, nn=1, **list, L=10, *vec, nnei, *nni;
   int i, j, k, t, num, temp;
-  double **s, T=1, tmp, lambda=.01, **D, sum, r, sqsigma, sqsigma2=0, noise, *m, w=1, **corr, *nm, **nmc, num1=0, num2=0, val, total_c, aver;
+  double **s, T=1, tmp, lambda=.1, **D, sum, r, sqsigma, sqsigma2=0, noise, *m, w=1, **corr, *nm, **nmc, num1=0, num2=0, val, total_c, aver;
 
    
-   while((c=getopt(argc, argv, "s:D:l:T:c:n:d:")) != -1) {
+   while((c=getopt(argc, argv, "s:D:l:t:c:n:d:")) != -1) {
     switch(c){
     case 's':
       myrand=atoi(optarg);
@@ -117,12 +117,13 @@ int main(int argc, char* argv[]){
     case 'c':
       def=atoi(optarg);
       break;
-    case 'T':
+    case 't':
       T=atof(optarg);
       break;
     }
    }
    
+  
    //if default use square lattice using the dimension dim and lattice size L//
    if(def==0)
      N=pow(L,dim);
@@ -130,7 +131,7 @@ int main(int argc, char* argv[]){
    //INITIALIZE//
    Init_Random();
    gasdev(w,1);
-
+   
    s=calloc(N,sizeof(double *));
    corr=calloc(N,sizeof(double *));
    nmc=calloc(N,sizeof(double *));
@@ -150,7 +151,6 @@ int main(int argc, char* argv[]){
 
    for(i=0;i<N;i++)
      list[i]=calloc(nn,sizeof(int));
-
 
 
    //DEFINE THE LIST OF NN IN A d-dim LATTICE
@@ -218,7 +218,7 @@ int main(int argc, char* argv[]){
    lambda=.5;
 
    for(temp=0;temp<NTEMP;temp++) {
-
+  
      //REINITIALIZE ALL THE AVERAGE VALUES
 
      for(i=0;i<N;i++){
@@ -232,7 +232,7 @@ int main(int argc, char* argv[]){
 
 
      if(NTEMP>1)
-       T= 1.5+(double)temp * .3;
+       T= 1.25+(double)temp * .08;
      
      for(j=0;j<NUMSAMPLES;j++){
        for(i=0;i<N;i++) {
@@ -270,12 +270,12 @@ int main(int argc, char* argv[]){
        for(i=0;i<N;i++) {
 	 for(num=0;num<NUMSAMPLES;num++){
 	   s[i][num]=s[i][num]*(1-r*Delta)+D[i][num];
-	
+	   
 	 }
 	 //UPDATE THE SPIN AND PRINT
 	 if((t%100==0)&&(i==20)&& (PLOT)){
 	   fprintf(stdout,"%lf ",t*Delta);
-      
+	   
 	   sum=0;
 	   aver=0;
 	   for(j=0;j<NUMSAMPLES;j++){
@@ -294,7 +294,7 @@ int main(int argc, char* argv[]){
 	 }*/
        
        
-       if((t%100==0)&&(t>5000)) {
+       if((t%50==0)&&(t>500000)) {
 	 
 	 for(i=0;i<N;i++) {	   
 	   for(k=0;k<NUMSAMPLES;k++) {
