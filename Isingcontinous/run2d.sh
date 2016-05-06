@@ -4,10 +4,10 @@ gcc -o langevin_ising2d.exe -lm langevin_isingnewc.c -O3
 for l in {2..2}
 do
  #d=2
-    L=`echo "$l"*40 | bc -l`
+    L=`echo "$l"*10 | bc -l`
     for t in {0..15}
     do
-	temp=`echo "$t"*.08+1.25 | bc -l`
+	temp=`echo 1.22-"$t"*.03 | bc -l`
 	echo $temp
 	L1=`echo "$L"+10 | bc -l`
 	L2=`echo "$L"+20 | bc -l`
@@ -16,10 +16,10 @@ do
 	echo $L1
 	echo $L2
 	echo $L3
-	./langevin_ising2d.exe -s $RANDOM -l $L -t $temp > d2file$L.$temp.txt 2>> d2pnewtrans$L.txt &
-	./langevin_ising2d.exe -s $RANDOM -l $L1 -t $temp > d2file$L1.$temp.txt 2>> d2pnewtrans$L1.txt &
-	./langevin_ising2d.exe -s $RANDOM -l $L2 -t $temp > d2file$L2.$temp.txt 2>> d2pnewtrans$L2.txt &
-	./langevin_ising2d.exe -s $RANDOM -l $L3 -t $temp > d2file$L3.$temp.txt 2>> d2pnewtrans$L3.txt 
+	./langevin_ising2d.exe -s $RANDOM -l $L -t $temp > d2filel$L.$temp.txt 2>> d2ptrans$L.txt &
+	./langevin_ising2d.exe -s $RANDOM -l $L1 -t $temp > d2filel$L1.$temp.txt 2>> d2ptrans$L1.txt &
+	./langevin_ising2d.exe -s $RANDOM -l $L2 -t $temp > d2filel$L2.$temp.txt 2>> d2ptrans$L2.txt &
+	./langevin_ising2d.exe -s $RANDOM -l $L3 -t $temp > d2filel$L3.$temp.txt 2>> d2ptrans$L3.txt 
     done
 done
 #wait

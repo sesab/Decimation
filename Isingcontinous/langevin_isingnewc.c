@@ -98,6 +98,7 @@ int main(int argc, char* argv[]){
   int c, dim=2, N=1000, def=0, nn=1, **list, L=10, *vec, nnei, *nni;
   int i, j, k, t, num, temp;
   double **s, T=1, tmp, lambda=.1, **D, sum, r, sqsigma, sqsigma2=0, noise, *m, w=1, **corr, *nm, **nmc, num1=0, num2=0, val, total_c, aver;
+  FILE *inter;
 
    
    while((c=getopt(argc, argv, "s:D:l:t:c:n:d:")) != -1) {
@@ -194,13 +195,15 @@ int main(int argc, char* argv[]){
    }
 
    //CHECK NN
- /* for(i=0;i<N;i++) { */
- /*     fprintf(stdout,"%d ",i); */
- /*     for(j=0;j<nn;j++) */
- /*       fprintf(stdout,"%d ",list[i][j]); */
- /*     fprintf(stdout,"\n"); */
- /*   } */
-
+   inter=fopen("inter.txt","w");
+   for(i=0;i<N;i++) {
+     //fprintf(inter,"%d ",i);
+     for(j=0;j<nni[i];j++)
+       fprintf(inter,"%d %d\n",i,list[i][j]);
+     //fprintf(stdout,"\n");
+   }
+   fflush(inter);
+   getchar();
    //INITIALIZE SPINS
   
   
@@ -215,7 +218,7 @@ int main(int argc, char* argv[]){
    D=calloc(N,sizeof(double*));
    for(i=0;i<N;i++)
      D[i]=calloc(NUMSAMPLES,sizeof(double));
-   lambda=.5;
+   lambda=.05;
 
    for(temp=0;temp<NTEMP;temp++) {
   
@@ -232,7 +235,7 @@ int main(int argc, char* argv[]){
 
 
      if(NTEMP>1)
-       T= 1.25+(double)temp * .08;
+       T= 1.25-(double)temp * .03;
      
      for(j=0;j<NUMSAMPLES;j++){
        for(i=0;i<N;i++) {
