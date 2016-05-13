@@ -95,9 +95,11 @@ int main(int argc, char *argv[]){
     
     O[num][num]=cos(theta);
     O[num2][num2]=cos(theta);
-    O[num][num2]=sin(theta);
-    O[num2][num]=-sin(theta);
+    O[num][num2]=-sin(theta);
+    O[num2][num]=sin(theta);
   }
+  //MATRIX MULTIPLICATION
+
 
   for(i=0;i<N;i++) {
     for(j=0;j<N;j++) {

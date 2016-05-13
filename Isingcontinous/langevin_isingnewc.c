@@ -95,7 +95,7 @@ double gaussian ( double sigma)
 
 
 int main(int argc, char* argv[]){
-  int c, dim=2, N=1000, def=0, nn=1, **list, L=10, *vec, nnei, *nni;
+  int c, dim=2, N=1000, def=0, nn=1, **list, L=10, *vec, nnei, *nni, **a;
   int i, j, k, t, num, temp;
   double **s, T=1, tmp, lambda=.1, **D, sum, r, sqsigma, sqsigma2=0, noise, *m, w=1, **corr, *nm, **nmc, num1=0, num2=0, val, total_c, aver;
   FILE *inter;
@@ -132,18 +132,20 @@ int main(int argc, char* argv[]){
    //INITIALIZE//
    Init_Random();
    gasdev(w,1);
-   
+
    s=calloc(N,sizeof(double *));
    corr=calloc(N,sizeof(double *));
    nmc=calloc(N,sizeof(double *));
    m=calloc(N,sizeof(double));
    nm=calloc(N,sizeof(double));
+   a=calloc(N,sizeof(int*));
    for(i=0;i<N;i++){
+     a[i]=calloc(N,sizeof(int));
      s[i]=calloc(NUMSAMPLES,sizeof(double));
      corr[i]=calloc(N,sizeof(double));
      nmc[i]=calloc(N,sizeof(double));
    }
-   
+
    list=calloc(N,sizeof(int*));
    if(def==0)
      nn=2*dim;
@@ -175,7 +177,9 @@ int main(int argc, char* argv[]){
 	   else
 	     nnei += pow(L,k)*vec[k];
 	 list[i][j] = nnei;
+	
 	 nni[i]++;
+	 a[i][nnei]=1;
        }
        for(j=nn/2;j<nn;j++){
 	 nnei=0;
@@ -190,17 +194,22 @@ int main(int argc, char* argv[]){
 	     nnei += pow(L,k)*vec[k];
 	 list[i][j] = nnei;
 	 nni[i]++;
+	 a[i][nnei]=1;
        }
      }
    }
-
+   printf("%d\n",N);
    //CHECK NN
    inter=fopen("inter.txt","w");
    for(i=0;i<N;i++) {
-     //fprintf(inter,"%d ",i);
-     for(j=0;j<nni[i];j++)
-       fprintf(inter,"%d %d\n",i,list[i][j]);
-     //fprintf(stdout,"\n");
+     //PRINT MATRIX FORM
+     for(j=0;j<N;j++)
+       fprintf(inter,"%d ",a[i][j]);
+     fprintf(inter,"\n");
+     //PRINT LIST OF NEIG
+     //for(j=0;j<nni[i];j++)
+     //  fprintf(inter,"%d %d\n",i,list[i][j]);
+     
    }
    fflush(inter);
    getchar();
