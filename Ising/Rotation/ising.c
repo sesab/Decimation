@@ -32,8 +32,8 @@ double gaussian ( double sigma)
 
 
 int main(int argc, char *argv[]){
-  int c, myrand,t,num,st,temp, NUM_TEMP,time_max=10;
-  int N=1, L=20,i,j,cnt,tmp=0;
+  int c, myrand,t,num,st,temp, NUM_TEMP,b,time_max=10, *perm;
+  int N=1, L=20,i,j,cnt,tmp=0, Temp=20;
   double **J, *s, **corr, *magn, *m, H, *h,prob, correlation, magnetization=0;
   double beta=.1, value,tmprary=0,sigma, **interactions; 
   int **vic,*neig;
@@ -42,10 +42,10 @@ int main(int argc, char *argv[]){
   int NUM_STORIE=500, *flag;
   FILE * inter;
   char *filec;
-  int M,sum, ric,max;
+  int M,sum, ric,max,  number_average=0,k;
   int dim=2;
 
-  while((c=getopt(argc, argv, "b:s:l:n:")) != -1) {
+  while((c=getopt(argc, argv, "b:s:l:t:n:")) != -1) {
     switch(c) {
     case 's':
       myrand=atoi(optarg);
@@ -58,6 +58,9 @@ int main(int argc, char *argv[]){
       break;
     case 'n':
       NUM_STORIE=atoi(optarg);
+      break;
+    case 't':
+      Temp=atoi(optarg);
       break;
     }
   }
@@ -81,6 +84,7 @@ int main(int argc, char *argv[]){
     vic[i]=malloc(30*sizeof(int));
     interactions[i]=malloc(30*sizeof(double));
   }
+  perm=malloc(N*sizeof(int));
   sprintf(filec,"rinter%d.txt",L);
   inter=fopen(filec,"r");
   //fprintf(stderr,"%s\n",filec);
@@ -166,7 +170,10 @@ int main(int argc, char *argv[]){
     vic[i]=realloc(vic[i],neig[i]*sizeof(int));
     interactions[i]=realloc(interactions[i],neig[i]*sizeof(double));
   }
-  NUM_TEMP=MAX*N;
+  if((beta>.92)||(beta<.84))
+    NUM_TEMP=100*N;
+  else
+    NUM_TEMP=MAX*N;
  
   s=malloc(N*sizeof(double));
   time_max=(int) NUM_TEMP/N;
@@ -176,88 +183,117 @@ int main(int argc, char *argv[]){
   corr=calloc(N,sizeof(double*));
   for(i=0;i<N;i++)
     corr[i]=calloc(N,sizeof(double));
-  
-  for(st=0;st<NUM_STORIE;st++) {
-    for(i=0;i<N;i++){
-      if(casual()<1)
-	s[i]=1.;
-      else
-	s[i]=-1.;
-    }
-    
-    for(t=0;t<NUM_TEMP*N;t++){
-     
-      num = (int) rand()/(RAND_MAX+1.)*N;
+
+  for(i=0;i<N;i++){
+    if(casual()<1)
+      s[i]=1.;
+    else
+      s[i]=-1.;
+  }
+  for(b=0;b<Temp;b++) {
+    beta=1.04-b*.025;
+   for(i=0;i<N;i++){
+	m[i]=0;
+	for(j=0;j<N;j++)
+	  corr[i][j]=0;
+      }
+      number_average=0;
       
-      H=h[num];
-      for(j=0;j<neig[num];j++)
-	H += .5* s[vic[num][j]] * interactions[num][j];
+    for(st=0;st<NUM_STORIE;st++) {
       
-      prob=1./(1.+exp(2*beta*H*s[num]));
-      
-      if(rand()/(RAND_MAX+1.)<prob)
-	s[num] = -s[num];
-      
-      
-      cnt=(int) t%(N*N);
-      
-      if(cnt==0){
+      for(t=0;t<NUM_TEMP;t++){
+	//CREATE RANDOM PERTUMATION 
+	for (k=0; k<N; ++k){
+	  perm[i]=i;
+	}
+	for (k=0; k<N; ++k){
+	  j = rand() % (k+1);
+	  perm[k] = perm[j];
+	  perm[j] = k;
+	}
 	
-	temp= (int) t/(N*N);
+	for(k=0;k<N;k++) {
+	  num=perm[k]; //pick sites permutated
+	  H=0.;
+	  for(j=0;j<neig[num];j++)
+	    H += .5* s[vic[num][j]] * interactions[num][j];
+	  
+	  prob=1./(1.+exp(2*beta*H*s[num]));
+	  
+	  if(rand()/(RAND_MAX+1.)<prob)
+	    s[num] = -s[num];
+	}
 	
-	//      for(i=0;i<N;i++){
+	cnt=(int) t%N;
+	
+	if(cnt==0){
+	  
+	  temp= (int) t/N;
+	  
+	  //      for(i=0;i<N;i++){
 	magn[temp] += s[1];
 	
 	
 	//}
+	}
+	if(t>NUM_TEMP-10) {
+	  number_average++;
+	  for(i=0;i<N;i++){
+	    m[i] += s[i];
+	    for(j=0;j<N;j++)
+	      corr[i][j] += s[i]*s[j];
+	  }
+	}
       }
+      
+      //for(i=0;i<N;i++){
+      // m[i] += s[i];
+      // for(j=0;j<N;j++)
+      //	corr[i][j] += s[i]*s[j];
+      //}
     }
-   
+    tmprary=0;
+    for(i=0;i<time_max;i++){
+      tmprary+=magn[i];
+      fprintf(stderr,"%d %lf %lf %d\n",i,magn[i]/number_average,tmprary/(i+1)/number_average,number_average);
+    }
+    
+    
+  
+    for(i=0;i<N;i++)
+      m[i] *= (double)1./number_average;
+    
+    
+    
+    // sprintf(outfilecorr,"corr.txt");
+    //if ((out = fopen(outfilecorr, "w"))==NULL){
+    // fprintf(stderr,"Cannot open file \n");
+    //}
+  
+    correlation=0;
     for(i=0;i<N;i++){
-      m[i] += s[i];
-      for(j=0;j<N;j++)
-	corr[i][j] += s[i]*s[j];
+      for(j=0;j<N;j++) {
+	//  fprintf(out,"%d %d %lf\n",i,j,corr[i][j]/NUM_STORIE-m[i]*m[j]);
+	correlation += corr[i][j]/number_average-m[i]*m[j];
+      }
+      //printf("%d %lf\n",i,(double)magn[i]/NUM_STORIE);
+    }  
+    //  fclose(out);
+    
+    //  sprintf(outfilem,"magn.txt");
+    //if ((out = fopen(outfilem, "w"))==NULL){
+    // fprintf(stderr,"Cannot open file \n");
+    //}
+    magnetization=0;
+    for(i=0;i<N;i++) {
+      //  fprintf(out,"%d %lf\n",i,m[i]);
+      magnetization += m[i];
     }
+    //  fclose(out); 
+    
+    fprintf(stdout,"%lf %lf %lf\n",1/beta,(double) magnetization/N, (double) correlation/N);
+    fflush(stdout);
   }
-  tmprary=0;
-  for(i=0;i<time_max;i++){
-   tmprary+=magn[i];
-   fprintf(stderr,"%d %lf %lf\n",i,magn[i]/NUM_STORIE,tmprary/(i+1)/NUM_STORIE);
-  }
-  
-  
-  
-  for(i=0;i<N;i++)
-    m[i] *= (double)1./NUM_STORIE;
-  
- 
-
-  // sprintf(outfilecorr,"corr.txt");
-  //if ((out = fopen(outfilecorr, "w"))==NULL){
-  // fprintf(stderr,"Cannot open file \n");
-  //}
-  correlation=0;
-  for(i=0;i<N;i++){
-    for(j=0;j<N;j++) {
-      //  fprintf(out,"%d %d %lf\n",i,j,corr[i][j]/NUM_STORIE-m[i]*m[j]);
-      correlation += corr[i][j]/NUM_STORIE-m[i]*m[j];
-    }
-    //printf("%d %lf\n",i,(double)magn[i]/NUM_STORIE);
-  }  
-  //  fclose(out);
-  
-  //  sprintf(outfilem,"magn.txt");
-  //if ((out = fopen(outfilem, "w"))==NULL){
-  // fprintf(stderr,"Cannot open file \n");
-  //}
-  magnetization=0;
-  for(i=0;i<N;i++) {
-    //  fprintf(out,"%d %lf\n",i,m[i]);
-    magnetization += m[i];
-  }
-  //  fclose(out); 
-
-  fprintf(stdout,"%lf %lf %lf\n",1/beta,(double) magnetization/N, (double) correlation/N);
   return(0);
   
 }

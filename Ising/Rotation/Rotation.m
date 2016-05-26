@@ -24,13 +24,11 @@ for t=1:MAX;
   R(j,i)= -sind(x);
 end
 
-R
+
 %T =  diag(ones(N-1,1),1) + diag(ones(N-1,1),-1);
-T=zeros(N);
 
-size(R)
 T=dlmread('/Users/sbradde/Documents/Projects/Decimation/Ising/Rotation/lattice2d20.txt')
-
+sum(sum(T>0))
 
 Eig=eig(T);
 

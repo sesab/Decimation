@@ -8,7 +8,7 @@ do
   
     for t in {1..25}
     do
-	beta=`echo 1.20-"$t"*.02 | bc -l`
+	beta=`echo 1.06-"$t"*.02 | bc -l`
 	echo $beta
 	./ising.exe -s $RANDOM -l $L -b $beta > tmp$L.$t.txt 2> tmpr$L.$t.txt 
 #	./a.out -s $RANDOM -l $L1 -b $beta > tmp$L1.$t.txt 2>  tmpr$L1.$t.txt 
