@@ -102,7 +102,7 @@ int main(int argc, char *argv[]){
   h=malloc(N*sizeof(double));
   flag=calloc(N,sizeof(int));
   for(i=0;i<N;i++)
-    h[i]=0.0001;
+    h[i]=0.0000;
   tmp=0;
   
   
@@ -190,15 +190,16 @@ int main(int argc, char *argv[]){
     else
       s[i]=-1.;
   }
+  
   for(b=0;b<Temp;b++) {
     beta=1.04-b*.025;
-   for(i=0;i<N;i++){
-	m[i]=0;
-	for(j=0;j<N;j++)
-	  corr[i][j]=0;
-      }
-      number_average=0;
-      
+    for(i=0;i<N;i++){
+      m[i]=0;
+      for(j=0;j<N;j++)
+	corr[i][j]=0;
+    }
+    number_average=0;
+    
     for(st=0;st<NUM_STORIE;st++) {
       
       for(t=0;t<NUM_TEMP;t++){
