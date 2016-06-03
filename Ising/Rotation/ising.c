@@ -2,7 +2,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<math.h>
-#define MAX 1000
+#define MAX 5000
 
 double casual( ){
   double r = (double) random()/(double)(RAND_MAX+1.0);
@@ -170,10 +170,10 @@ int main(int argc, char *argv[]){
     vic[i]=realloc(vic[i],neig[i]*sizeof(int));
     interactions[i]=realloc(interactions[i],neig[i]*sizeof(double));
   }
-  if((beta>.92)||(beta<.84))
-    NUM_TEMP=100*N;
-  else
-    NUM_TEMP=MAX*N;
+  //if((beta>.92)||(beta<.84))
+  // NUM_TEMP=100*N;
+  //else
+  NUM_TEMP=MAX*N;
  
   s=malloc(N*sizeof(double));
   time_max=(int) NUM_TEMP/N;
@@ -192,7 +192,7 @@ int main(int argc, char *argv[]){
   }
   
   for(b=0;b<Temp;b++) {
-    beta=1.04-b*.025;
+    beta=1.565-b*.025;
     for(i=0;i<N;i++){
       m[i]=0;
       for(j=0;j<N;j++)

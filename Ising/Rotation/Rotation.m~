@@ -14,11 +14,10 @@ function Rotation(x,L)
 N=L*L
 R=eye(N);
 temp=randperm(N);
-MAX=20;
+MAX=10;
 for t=1:MAX;
   i=temp(t);
-  j=temp(end-t+1);
-  x=rand()*10;
+  j=temp(end-t);
   R(i,i) = cosd(x);
   R(i,j)= -sind(x);
   R(j,j) = cosd(x);
@@ -28,7 +27,7 @@ end
 
 %T =  diag(ones(N-1,1),1) + diag(ones(N-1,1),-1);
 
-T=dlmread('/Users/sbradde/Documents/Projects/Decimation/Ising/Rotation/lattice2d30.txt')
+T=dlmread('/Users/sbradde/Documents/Projects/Decimation/Ising/Rotation/lattice2d20.txt')
 sum(sum(T>0))
 
 Eig=eig(T);
@@ -49,14 +48,14 @@ figure(3)
 hist(val,50);
 
 
-dlmwrite('/Users/sbradde/Documents/Projects/Decimation/Ising/Rotation/rotatelattice2d30.txt',V,' ');
+dlmwrite('/Users/sbradde/Documents/Projects/Decimation/Ising/Rotation/rotatelattice2d20.txt',V,' ');
 
 M=sum(sum(V>0))
 inter=zeros(M,3);
 cnt=1;
 for i=1:N
     for j=1:N
-        if(V(i,j)~=0.)
+        if(V(i,j)~0)
             inter(cnt,1)=i;
             inter(cnt,2)=j;
             inter(cnt,3)=V(i,j);
@@ -64,5 +63,5 @@ for i=1:N
         end
     end
 end
-dlmwrite('/Users/sbradde/Documents/Projects/Decimation/Ising/Rotation/rinter30.txt',inter,' ');
+dlmwrite('/Users/sbradde/Documents/Projects/Decimation/Ising/Rotation/rinter50.txt',inter,' ');
 
