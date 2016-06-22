@@ -72,7 +72,7 @@ for n=1:length(starts);
     n
     Y = V8(:,starts(n):N*8)*V8(:,starts(n):N*8)'*YY;
     Y = Y - mean(Y,2)*ones(1,floor(R*T/8));
-    M4_8(n,:) = mean(Y.^4,2)./(mean(Y.^2,2).^2);
+    M4_8(n,:) = mean(Y.^4,2)/(mean(Y.^2,2).^2);
 end
     
 frac = (8*N-starts+1)/(8*N);
@@ -93,14 +93,19 @@ print -depsc2 160616_fig01.eps
 
 
 figure(4)
-loglog(frac,M4_8,[0.001 1],[3 3],'k--')
+colors=distinguishable_colors(N*8);
+for k=1:N*8
+ loglog(frac,M4_8(:,k),'-','color', colors(k,:))
+ hold on
+end
+loglog([0.001 1],[3 3],'k--')
 xlabel('fraction of remaining modes')
 ylabel('normalized fourth moments')
 axis([0.001 1 1 1000])
 axis square
 set(gca,'FontSize',16,'TickDir','Out')
 print -depsc2 160616_fig02.eps
-
+hold off
 %save 160616.mat
 
 

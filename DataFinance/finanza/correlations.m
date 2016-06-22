@@ -34,8 +34,9 @@ for i=1:cnt-1
 end
 
 N=tmp-1;
+
 %%
-NSAMPLE=1;
+NSAMPLE=2;
 YY = zeros(N*NSAMPLE,floor(l/NSAMPLE));
 for t=1:floor(l/NSAMPLE);
     YY(:,t) = reshape(matrix(:,NSAMPLE*(t-1)+1:NSAMPLE*t),N*NSAMPLE,1);
@@ -44,9 +45,11 @@ end
 CC8 = cov(YY');
 [V8,E8] = eig(CC8);
 
-starts = [1 floor( N*NSAMPLE/100) floor( N*NSAMPLE/64) ...
+starts = [1 floor( N*NSAMPLE/90)+1 floor( N*NSAMPLE/64) ...
     floor( N*NSAMPLE/32) floor( N*NSAMPLE/16) floor( N*NSAMPLE/8) ...
-    floor( N*NSAMPLE/4) floor(N*NSAMPLE/2) N*NSAMPLE-1]
+    floor( N*NSAMPLE/4) floor(N *(NSAMPLE-1+1/2))+1 floor(N*(NSAMPLE-1+3/4))+1 ...
+    floor(N*(NSAMPLE-1+7/8))+1 floor(N*(NSAMPLE-1+15/16))+1 floor(N*(NSAMPLE-1+31/32))+1 ]
+
 for n=1:length(starts);
     n
     Y = V8(:,starts(n):N*NSAMPLE)*V8(:,starts(n):N*NSAMPLE)'*YY;
@@ -57,7 +60,7 @@ end
 frac = (NSAMPLE*N-starts+1)/(NSAMPLE*N);
 
 
-figure(1)
+figure(6)
 loglog(sort(1./diag(E8),'ascend')/mean(1./diag(E8)),[1:N*NSAMPLE]/(N*NSAMPLE),'r.',...
     [0.001:0.001:1],(0.3)*[0.001:0.001:1],'g--',...
     [0.001:0.001:1],(30)*[0.001:0.001:1].^2,'c--')
@@ -69,11 +72,11 @@ axis square
 set(gca,'FontSize',16,'TickDir','Out')
 %print -depsc2 160616_fig01.eps
 
-figure(2)
-plot(frac,M4_8,[0.001 1],[3 3],'k--')
+figure(7)
+loglog(frac,M4_8,[0.001 1],[3 3],'k--')
 xlabel('fraction of remaining modes')
 ylabel('normalized fourth moments')
-axis([0.001 1 1 10])
+axis([0.01 1 1 1000])
 axis square
 %set(gca,'FontSize',16,'TickDir','Out')
 %print -depsc2 160616_fig02.eps
