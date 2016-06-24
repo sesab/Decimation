@@ -21,10 +21,10 @@ M1=zeros(N*8,N*8);
 %Create the matrix with eigenvalues Eigenvalues
 for i = 1:length(Eigenvalues)
    e_current = zeros(1,N*8); % make standard unit vector
-    e_current(i) = 1;
-    M1 = M1 + Eigenvalues(i)*(ones(N*8)-eye(N*8)) + eye(N*8); % add mode to Signal matrix
+   e_current(i) = 1;
+   
 end
-
+M1 = 1.1* (ones(N*8)-eye(N*8)) + eye(N*8); % add mode to Signal matrix
 %R=M;
 %X=randn(N*8,M);
 %YY=X;

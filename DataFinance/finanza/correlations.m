@@ -28,7 +28,7 @@ tmp=1;
 for i=1:cnt-1  
     if(len(i)==l)
         time(tmp,:)=time_data{i};
-        matrix(tmp,:)=data{i};
+        matrixprice(tmp,:)=data{i};
         tmp=tmp+1
     end
 end
@@ -36,6 +36,8 @@ end
 N=tmp-1;
 
 %%
+matrix=diff(matrixprice')';
+l=l-1;
 NSAMPLE=2;
 YY = zeros(N*NSAMPLE,floor(l/NSAMPLE));
 for t=1:floor(l/NSAMPLE);
@@ -67,16 +69,20 @@ loglog(sort(1./diag(E8),'ascend')/mean(1./diag(E8)),[1:N*NSAMPLE]/(N*NSAMPLE),'r
 legend('one time bin','eight time bins','D_{eff} = 2','D_{eff} = 4')
 xlabel('normalized eigenvalue')
 ylabel('cumulative density')
-axis([0.001 100 0.0005 1])
+axis([0.0001 100 0.0005 1])
 axis square
 set(gca,'FontSize',16,'TickDir','Out')
 %print -depsc2 160616_fig01.eps
 
 figure(7)
-loglog(frac,M4_8,[0.001 1],[3 3],'k--')
+colors=distinguishable_colors(N*8);
+for k=1:N*NSAMPLE
+ loglog(frac,M4_8(:,k),'-','color', colors(k,:))
+ hold on
+end
 xlabel('fraction of remaining modes')
 ylabel('normalized fourth moments')
-axis([0.01 1 1 1000])
+axis([0.001 1 1 1000])
 axis square
 %set(gca,'FontSize',16,'TickDir','Out')
 %print -depsc2 160616_fig02.eps
