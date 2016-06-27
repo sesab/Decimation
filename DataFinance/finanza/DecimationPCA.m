@@ -6,7 +6,7 @@
 clear YY
 M=10000; %timepoints
 N=200; % number of variables
-X=randn(N,M);
+X=randn(N,M).^2;
 R=floor(M/8);
 YY = zeros(N*8,floor(M/8));
 for t=1:R;
@@ -24,14 +24,16 @@ for i = 1:length(Eigenvalues)
    e_current(i) = 1;
    
 end
-M1 = 1.1* (ones(N*8)-eye(N*8)) + eye(N*8); % add mode to Signal matrix
+M1 = .2* (ones(N*8)-eye(N*8)); % add mode to Signal matrix
 %R=M;
 %X=randn(N*8,M);
 %YY=X;
+C_Matrix= YY';
 
-C_Matrix=YY';
 %CC8 = cov(YY');
 CC8=cov(C_Matrix);
+
+CC8=eye(N*8) + (ones(N*8)-eye(N*8))*1.3+cov(YY');
 matrix=C_Matrix';
 [V8,E8] = eig(CC8);
 %[V8,E8] = eig(matrix);
@@ -76,7 +78,7 @@ end
 loglog([0.001 1],[3 3],'k--');
 xlabel('fraction of remaining modes')
 ylabel('normalized fourth moments')
-axis([0.001 1 1 10])
+axis([0.001 1 1 100])
 axis square
 set(gca,'FontSize',16,'TickDir','Out')
 print -depsc2 160616_fig04.eps
