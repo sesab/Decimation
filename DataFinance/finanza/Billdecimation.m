@@ -75,7 +75,7 @@ for n=1:length(starts);
     Y = Y - mean(Y,2)*ones(1,floor(R*T/8));
     M4_8(n,:) = mean(Y.^4,2)./(mean(Y.^2,2).^2);
 end
-    
+
 frac = (8*N-starts+1)/(8*N);
 
 
@@ -109,5 +109,16 @@ print -depsc2 160616_fig02.eps
 hold off
 %save 160616.mat
 
+figure(8)
+hold on
+loglog(frac,mean(M4_8,2),'r-')
+hold on
+loglog([0.001 1],[3 3],'k--')
+xlabel('fraction of remaining modes')
+ylabel('normalized fourth moments')
+axis([0.001 1 1 1000])
+axis square
+set(gca,'FontSize',16,'TickDir','Out')
+print -depsc2 200616_average07.eps
 
     

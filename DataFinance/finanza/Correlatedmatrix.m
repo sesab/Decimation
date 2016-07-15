@@ -3,7 +3,7 @@ L=20;
 N=L^3;
 S=10000;
 m=1;
-beta=1.02;
+beta=.99;
 eigenC=zeros(N,1);
 J=zeros(N);
 for i=1:N
@@ -14,15 +14,15 @@ for i=1:N
             J(i,j)=1;
         end
         %Add periodic boundaries
-    if((abs(yi-yj)+abs(zi-zj)==0)&&(abs(xj-xi)==9))
+    if((abs(yi-yj)+abs(zi-zj)==0)&&(abs(xj-xi)==L-1))
         
         J(i,j)=1;
     end
-     if((abs(xi-xj)+abs(zi-zj)==0)&&(abs(yj-yi)==9))
+     if((abs(xi-xj)+abs(zi-zj)==0)&&(abs(yj-yi)==L-1))
         
         J(i,j)=1;
      end
-     if((abs(xi-xj)+abs(yi-yj)==0)&&(abs(zj-zi)==9))
+     if((abs(xi-xj)+abs(yi-yj)==0)&&(abs(zj-zi)==L-1))
         
         J(i,j)=1;
     end

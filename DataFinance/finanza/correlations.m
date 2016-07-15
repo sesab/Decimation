@@ -64,15 +64,15 @@ frac = (NSAMPLE*N-starts+1)/(NSAMPLE*N);
 
 figure(6)
 loglog(sort(1./diag(E8),'ascend')/mean(1./diag(E8)),[1:N*NSAMPLE]/(N*NSAMPLE),'r.',...
-    [0.001:0.001:1],(0.3)*[0.001:0.001:1],'g--',...
-    [0.001:0.001:1],(30)*[0.001:0.001:1].^2,'c--')
+    [0.0001:0.001:1],10*[0.001:0.001:1],'g--',...
+    [0.0001:0.001:1],100*[0.001:0.001:1].^2,'c--')
 legend('one time bin','eight time bins','D_{eff} = 2','D_{eff} = 4')
 xlabel('normalized eigenvalue')
 ylabel('cumulative density')
 axis([0.0001 100 0.0005 1])
 axis square
 set(gca,'FontSize',16,'TickDir','Out')
-%print -depsc2 160616_fig01.eps
+print -depsc2 160616_fig06.eps
 
 figure(7)
 colors=distinguishable_colors(N*8);
@@ -80,12 +80,25 @@ for k=1:N*NSAMPLE
  loglog(frac,M4_8(:,k),'-','color', colors(k,:))
  hold on
 end
+loglog([0.001 1],[3 3],'k--')
 xlabel('fraction of remaining modes')
 ylabel('normalized fourth moments')
 axis([0.001 1 1 1000])
 axis square
-%set(gca,'FontSize',16,'TickDir','Out')
-%print -depsc2 160616_fig02.eps
+set(gca,'FontSize',16,'TickDir','Out')
+print -depsc2 160616_fig07.eps
+
+figure(8)
+colors=distinguishable_colors(N*8);
+loglog(frac,mean(M4_8,2),'g-')
+hold on
+loglog([0.001 1],[3 3],'k--')
+xlabel('fraction of remaining modes')
+ylabel('normalized fourth moments')
+axis([0.001 1 1 1000])
+axis square
+set(gca,'FontSize',16,'TickDir','Out')
+print -depsc2 200616_average07.eps
 
 %%
 N=length(Eig{1});
@@ -150,7 +163,7 @@ ylabel('cumulative density')
 axis([0.001 100 0.0005 1])
 axis square
 set(gca,'FontSize',16,'TickDir','Out')
-print -depsc2 160616_fig01.eps
+print -depsc2 160616_fig10.eps
 
 
 figure(2)
@@ -160,7 +173,7 @@ ylabel('normalized fourth moments')
 axis([0.001 1 1 1000])
 axis square
 set(gca,'FontSize',16,'TickDir','Out')
-print -depsc2 160616_fig02.eps
+print -depsc2 160616_fig11.eps
 
 
 

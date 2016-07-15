@@ -7,6 +7,10 @@ clear YY
 M=10000; %timepoints
 N=200; % number of variables
 X=randn(N,M).^2;
+%Y=rand(N,1);
+%for i=1:N;
+% X(i,:)=Y(i)*X1(i,:);
+%end
 R=floor(M/8);
 YY = zeros(N*8,floor(M/8));
 for t=1:R;
